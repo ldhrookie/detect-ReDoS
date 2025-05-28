@@ -40,23 +40,31 @@ def predict_with_ai(pattern: str):
     return pred == 1
 
 def main():
-    regex = input("검사할 정규표현식을 입력하세요: ")
-    result = predict_with_ai(regex)
-    if result is None:
-        print("🤔 AI가 확신을 갖고 분류하지 못했습니다. 직접 레이블을 입력해 주세요.")
-        label_input = input("취약(1)/안전(0)/모름(Enter): ")
-        if label_input in ["0", "1"]:
-            label = int(label_input)
-            update_model(regex, label)
+    print("여러 개의 정규표현식을 한 줄씩 입력하세요. (빈 줄 입력 시 종료)")
+    regex_list = []
+    while True:
+        regex = input("정규표현식: ")
+        if not regex.strip():
+            break
+        regex_list.append(regex)
+
+    for regex in regex_list:
+        print(f"\n[검사] {regex}")
+        result = predict_with_ai(regex)
+        if result is None:
+            print("🤔 AI가 확신을 갖고 분류하지 못했습니다. 직접 레이블을 입력해 주세요.")
+            label_input = input("취약(1)/안전(0)/모름(Enter): ")
+            if label_input in ["0", "1"]:
+                label = int(label_input)
+                update_model(regex, label)
+            else:
+                print("❗️레이블이 입력되지 않아 학습하지 않습니다.")
+        elif result:
+            print("⚠️ AI가 취약한 정규표현식으로 분류했습니다. ReDoS 위험이 있습니다.")
+            update_model(regex, 1)
         else:
-            print("❗️레이블이 입력되지 않아 학습하지 않습니다.")
-    elif result:
-        print("⚠️ AI가 취약한 정규표현식으로 분류했습니다. ReDoS 위험이 있습니다.")
-        update_model(regex, 1)
-    else:
-        print("✅ AI가 안전한 정규표현식으로 분류했습니다.")
-        update_model(regex, 0)
+            print("✅ AI가 안전한 정규표현식으로 분류했습니다.")
+            update_model(regex, 0)
 
 if __name__ == "__main__":
     main()
-
