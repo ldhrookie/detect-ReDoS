@@ -58,4 +58,8 @@ def main():
         update_model(regex, 0)
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> 99faf56 (Update model after detection learning)
