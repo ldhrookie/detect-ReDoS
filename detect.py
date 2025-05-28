@@ -56,3 +56,6 @@ def main():
     else:
         print("✅ AI가 안전한 정규표현식으로 분류했습니다.")
         update_model(regex, 0)
+
+if __name__ == "__main__":
+    main()
