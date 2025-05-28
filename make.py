@@ -1,8 +1,11 @@
+import sys
 import joblib
 from sklearn.linear_model import SGDClassifier
 import os
 import subprocess
 
+
+input = sys.stdin.readline
 def extract_features(pattern: str):
     return [
         len(pattern),
@@ -21,26 +24,25 @@ if os.path.exists('redos_model.pkl'):
 else:
     model = SGDClassifier(loss="log_loss")
 
-print("정규표현식과 레이블(취약:1, 안전:0)을 한 줄에 입력하세요. (예: (a+)+ 1)")
-print("입력을 마치려면 빈 줄(Enter)만 입력하세요.")
+# filename = input("학습 데이터 파일명을 입력하세요 (예: regex_samples.txt): ").strip()
+filename = input().strip()
 
 patterns = []
 labels = []
 
-while True:
-    line = input("입력: ")
-    if not line.strip():
-        break
-    try:
-        pattern, label = line.rsplit(maxsplit=1)
-        if label not in ["0", "1"]:
-            print("레이블은 0 또는 1만 입력하세요.")
+with open(filename, encoding="utf-8") as f:
+    for line in f:
+        line = line.strip()
+        if not line:
             continue
-        patterns.append(pattern)
-        labels.append(int(label))
-    except ValueError:
-        print("형식: 정규표현식 0 또는 정규표현식 1 (예: (a+)+ 1)")
-        continue
+        try:
+            pattern, label = line.rsplit(maxsplit=1)
+            if label not in ["0", "1"]:
+                continue
+            patterns.append(pattern)
+            labels.append(int(label))
+        except ValueError:
+            continue
 
 if patterns:
     for p, l in zip(patterns, labels):
