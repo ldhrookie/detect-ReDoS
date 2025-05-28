@@ -21,24 +21,36 @@ if os.path.exists('redos_model.pkl'):
 else:
     model = SGDClassifier(loss="log_loss")
 
-print("시작")  # 실행 확인용
+print("정규표현식과 레이블(취약:1, 안전:0)을 한 줄에 입력하세요. (예: (a+)+ 1)")
+print("입력을 마치려면 빈 줄(Enter)만 입력하세요.")
 
-# 새로운 데이터 입력
-new_pattern = input("새 정규표현식: ")
-print("입력 완료")  # 입력 확인용
-new_label = int(input("취약(1)/안전(0): "))
+patterns = []
+labels = []
 
-X_new = [extract_features(new_pattern)]
-y_new = [new_label]
+while True:
+    line = input("입력: ")
+    if not line.strip():
+        break
+    try:
+        pattern, label = line.rsplit(maxsplit=1)
+        if label not in ["0", "1"]:
+            print("레이블은 0 또는 1만 입력하세요.")
+            continue
+        patterns.append(pattern)
+        labels.append(int(label))
+    except ValueError:
+        print("형식: 정규표현식 0 또는 정규표현식 1 (예: (a+)+ 1)")
+        continue
 
-# 증분 학습
-model.partial_fit(X_new, y_new, classes=[0, 1])
-
-# 모델 저장
-joblib.dump(model, 'redos_model.pkl')
-print("모델이 성공적으로 학습되고 저장되었습니다! (redos_model.pkl)")
-
-# git에 자동 반영
-subprocess.run(["git", "add", "redos_model.pkl"])
-subprocess.run(["git", "commit", "-m", "Update model after new training data"], check=False)
-subprocess.run(["git", "push"], check=False)
+if patterns:
+    for p, l in zip(patterns, labels):
+        X_new = [extract_features(p)]
+        y_new = [l]
+        model.partial_fit(X_new, y_new, classes=[0, 1])
+    joblib.dump(model, 'redos_model.pkl')
+    print(f"{len(patterns)}개의 데이터로 누적 학습 완료! (redos_model.pkl)")
+    subprocess.run(["git", "add", "redos_model.pkl"])
+    subprocess.run(["git", "commit", "-m", "Update model after batch training"], check=False)
+    subprocess.run(["git", "push"], check=False)
+else:
+    print("입력된 데이터가 없습니다.")
